@@ -1,0 +1,39 @@
+*** Using Compiler 'V5.06 update 6 (build 750)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
+Build target 'foc1'
+compiling stm32h7xx_it.c...
+../Core/Inc/stm32h7xx_it.h(78): warning:  #1-D: last line of file ends without a newline
+  #endif /* __STM32H7xx_IT_H */
+../Core/Inc/foc_math.h(69): warning:  #1-D: last line of file ends without a newline
+  #endif /* __FOC_MATH_H */
+../Core/Inc/foc.h(72): warning:  #1-D: last line of file ends without a newline
+  #endif /* __FOC_H */
+../Core/Src/stm32h7xx_it.c: 3 warnings, 0 errors
+linking...
+foc1\foc1.axf: Error: L6218E: Undefined symbol FOC_PI_Init (referred from main.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Motor_Hardware_Init (referred from main.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Motor_PWM_Start (referred from main.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Sensorless_Init (referred from main.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Angle_Est (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol FOC_Current_Loop (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol FOC_PI_Clear (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol MotorSys (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Motor_Debug_DAC_Output (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Motor_Get_Bus_Voltage (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Motor_Get_Phase_Currents (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Motor_PWM_Stop (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Motor_Set_PWM_Duty (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Motor_Update_Encoder_Data (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol PI_Calc (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol PI_Speed (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Speed_Est_RPM (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Strategy_Get_Id_Iq_Ref (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol Strategy_Position_Align (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol aADCxConvertedData (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol aADCxConvertedData_Voltage (referred from stm32h7xx_it.o).
+foc1\foc1.axf: Error: L6218E: Undefined symbol target_speed_rpm (referred from stm32h7xx_it.o).
+Not enough information to list image symbols.
+Not enough information to list load addresses in the image map.
+Finished: 2 information, 0 warning and 22 error messages.
+"foc1\foc1.axf" - 22 Error(s), 3 Warning(s).
+Target not created.
+Build Time Elapsed:  00:00:15

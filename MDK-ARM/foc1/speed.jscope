@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<JScopeProject>
+    <FileVersion major="1" minor="1" />
+    <Project>
+        <Configuration>
+            <JLink>
+                <Options Connection="1" IsRTTSession="0" IsRTTWithTimeStamp="0" SamplingPeriod="100" SerialNo="0" JTAG_IRPre="0" JTAG_DRPre="0" IP="" TargetDevice="STM32H743ZI" TargetInterface="SWD" InterfaceSpeed="4000" />
+            </JLink>
+            <ElfFile Name="E:\STM32\0609_FOC_jcx_addUdc_varyF\foc1\MDK-ARM\foc1\foc1.axf" />
+            <Scope>
+                <Options TimeResolutionUs="1000000" />
+            </Scope>
+        </Configuration>
+        <Windows>
+            <Graph Show="1" />
+            <Watch Show="1" />
+        </Windows>
+        <SelectedSymbols>
+            <Symbol>
+                <Options Name="speed_var_gc" Address="0x24000064" Type="float" TypeID="1" Size="4" GraphColorRed="255" GraphColorGreen="0" GraphColorBlue="0" YMinSampled="0" YMaxSampled="5" YAvgSampled="2.99229" Offset="4" ShowInGraph="1" ACCoupling="0" YOffset="0" IsAutoConfig="0" YResolution="2" MaxValue="-2147483648" File="../Core/Src/stm32h7xx_it.c" Scope="0" DrawStyle="0" />
+            </Symbol>
+            <Symbol>
+                <Options Name="speed_act_rpm_gc" Address="0x24000068" Type="float" TypeID="1" Size="4" GraphColorRed="0" GraphColorGreen="0" GraphColorBlue="255" YMinSampled="-0.0732422" YMaxSampled="5.49316" YAvgSampled="2.81793" Offset="8" ShowInGraph="1" ACCoupling="0" YOffset="0" IsAutoConfig="0" YResolution="2" MaxValue="-2147483648" File="../Core/Src/stm32h7xx_it.c" Scope="0" DrawStyle="0" />
+            </Symbol>
+        </SelectedSymbols>
+    </Project>
+</JScopeProject>

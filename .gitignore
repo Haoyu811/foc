@@ -1,0 +1,21 @@
+# Keil build and temporary files
+*.o
+*.d
+*.crf
+*.map
+*.axf
+*.htm
+*.sct
+*.dep
+*.lnp
+*.bak
+*.lst
+
+# Keil User Specific UI/Layout settings
+*.uvguix.*
+*.uvoptx
+
+# Standard Keil output folders
+Objects/
+Listings/
+DebugConfig/
