@@ -20,7 +20,9 @@ uint16_t aADCxConvertedData_Voltage[BUFFER_SIZE_VOLTAGE];
 
 // ADC 零偏值缓存
 static uint16_t PhaseAOffset = 0, PhaseBOffset = 0, PhaseCOffset = 0, IBusOffset = 0;
-static uint16_t UdcOffset = 0;
+
+uint16_t Acount = 0; // 确保声明了定位函数里求出的零偏
+
 
 /* ================== 私有函数声明 ================== */
 static void Motor_Calibrate_ADC_Offset(void);
@@ -109,7 +111,14 @@ void Motor_Get_Bus_Voltage(float *pUdc)
     *pUdc = (float)aADCxConvertedData_Voltage[0] * ADC_VOLTAGE_COEFF;
 }
 
-extern uint16_t Acount; // 确保声明了定位函数里求出的零偏
+/* =======================================================
+ * 供外部策略层（如预定位算法）读取原始编码器计数值的接口
+ * ======================================================= */
+uint16_t Motor_Get_Encoder_Count(void)
+{
+    // 直接返回 TIM3 编码器模式的原始计数值
+    return __HAL_TIM_GET_COUNTER(&htim3);
+}
 
 void Motor_Update_Encoder_Data(float *pElec_Angle_Rad, float *pSpeed_RPM)
 {

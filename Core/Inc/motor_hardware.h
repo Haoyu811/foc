@@ -35,6 +35,8 @@ void Motor_Get_Phase_Currents(float *pIu, float *pIv, float *pIw, float *pIbus);
  */
 void Motor_Get_Bus_Voltage(float *pUdc);
 
+uint16_t Motor_Get_Encoder_Count(void);
+
 /**
  * @brief 更新并获取编码器的电角度与实际机械转速
  * @param pElec_Angle_Rad 输出: 当前电角度 (弧度, 0~2π)

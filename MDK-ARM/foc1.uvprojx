@@ -491,11 +491,6 @@
               <FilePath>..\Core\Src\control_strategy.c</FilePath>
             </File>
             <File>
-              <FileName>encoder.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\encoder.c</FilePath>
-            </File>
-            <File>
               <FileName>foc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\foc.c</FilePath>
@@ -519,6 +514,11 @@
               <FileName>sensorless.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\sensorless.c</FilePath>
+            </File>
+            <File>
+              <FileName>motor_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\motor_config.h</FilePath>
             </File>
           </Files>
         </Group>

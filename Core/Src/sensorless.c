@@ -49,7 +49,6 @@ void Sensorless_Init(void) {
 }
 
 void Sensorless_Resolver(float Id_fb, float Iq_fb, float Ualpha, float Ubeta) {
-    float angle_error = 0.0f;
 
 #if (CURRENT_SENSORLESS_MODE == SENSORLESS_HFI)
     // 1. 生成高频信号
@@ -58,6 +57,7 @@ void Sensorless_Resolver(float Id_fb, float Iq_fb, float Ualpha, float Ubeta) {
 #endif
 
 #if (CURRENT_SENSORLESS_MODE != SENSORLESS_NONE)
+    float angle_error = 0.0f;
     // 统一锁相环 (PLL) 更新角度与速度
     PI_Calc(&PI_PLL, 0.0f, angle_error);
     Angle_Est += PI_PLL.Out * TS;

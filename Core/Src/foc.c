@@ -14,7 +14,7 @@ void FOC_PI_Init(void)
     PI_Id.Kp = KP_ID;       PI_Id.Ki = KI_ID;       PI_Id.Out_Limit = UDC_NOMINAL * VALUE_1_SQRT3;
     PI_Iq.Kp = KP_IQ;       PI_Iq.Ki = KI_IQ;       PI_Iq.Out_Limit = UDC_NOMINAL * VALUE_1_SQRT3;
     
-    PI_Speed.Kp = KP_SPD;   PI_Speed.Ki = KI_SPD;   PI_Speed.Out_Limit = 1.0f; // 额定电流标幺值或最大电流
+    PI_Speed.Kp = KP_SPD;   PI_Speed.Ki = KI_SPD;   PI_Speed.Out_Limit = CURRENT_LIMIT; // 额定电流标幺值或最大电流
     
     PI_Phase.Kp = KP_PLL;   PI_Phase.Ki = KI_PLL;   PI_Phase.Out_Limit = 10000.0f; // PLL 频率限幅
     
@@ -139,7 +139,7 @@ void SVPWM_Calc(float Ualpha, float Ubeta, float Udc, uint16_t *pwm_a, uint16_t 
     *pwm_c = c;
 }
 
-void FOC_Current_Loop(const Vector_3Phase_t *I_abc, float Angle, float Iq_Ref, float Id_Ref, float Udc, uint16_t *pwm_out)
+void FOC_Current_Loop(const Vector_3Phase_t *I_abc, float Angle, float Iq_Ref, float Id_Ref, float Udc, float speed_act, uint16_t *pwm_out)
 {
     Vector_AlBe_t I_albe;
     Vector_DQ_t   I_dq;
@@ -159,8 +159,8 @@ void FOC_Current_Loop(const Vector_3Phase_t *I_abc, float Angle, float Iq_Ref, f
     PI_Id.Out_Limit = v_limit;
     PI_Iq.Out_Limit = v_limit;
 
-    V_dq.D = PI_Calc(&PI_Id, Id_Ref, I_dq.D);
-    V_dq.Q = PI_Calc(&PI_Iq, Iq_Ref, I_dq.Q);
+    V_dq.D = PI_Calc(&PI_Id, Id_Ref, I_dq.D) - speed_act*POLE_PAIRS*MATH_2PI*MOTOR_LQ/60;
+    V_dq.Q = PI_Calc(&PI_Iq, Iq_Ref, I_dq.Q) + speed_act*POLE_PAIRS*MATH_2PI*MOTOR_FLUX/60;
 
     // 4. 逆 Park 变换 (电压输出)
     Inv_Park_Transform(&V_dq, &trig, &V_albe);

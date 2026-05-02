@@ -12,5 +12,3 @@ volatile Motor_State_t MotorSys = {
     .Position_Flag  = 0,
     .Z_Index_Flag   = 0
 };
-
-float target_speed_rpm = 1000.0f; 

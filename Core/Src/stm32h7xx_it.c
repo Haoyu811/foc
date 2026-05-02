@@ -44,12 +44,23 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+Ramp_Generator_t Speed_Ramp = {
+    .Target = 0.0f,
+    .Current = 0.0f,
+    .Step = ACCEL_RATE*TS, 
+    .Enable = 1      // 默认开启斜坡
+};
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+float Ia, Ib, Ic, Ibus;
+float Udc;
+float elec_angle_rad;    
+float speed_act_rpm; 
+float target_Id = 0.0f;
+float target_Iq = 0.0f;
+float target_speed_rpm=500.0f;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -74,8 +85,6 @@ extern TIM_HandleTypeDef htim8;
 extern uint16_t aADCxConvertedData[BUFFER_SIZE];
 extern uint16_t aADCxConvertedData_Voltage[BUFFER_SIZE_VOLTAGE];
 
-extern float target_speed_rpm;
-extern float speed_act_rpm;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -309,11 +318,15 @@ void EXTI15_10_IRQHandler(void)
   */
 void TIM1_CC_IRQHandler(void)
 {
+  // 刚进中断，立刻把引脚拉高
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
   /* USER CODE BEGIN TIM1_CC_IRQn 0 */
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)aADCxConvertedData, 4);
   HAL_ADC_Start_DMA(&hadc3, (uint32_t *)aADCxConvertedData_Voltage, 1);
 
   HAL_TIM_IRQHandler(&htim1);
+  // 准备退出中断前，把引脚拉低
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
 }
 
 /* ========================================================================= */
@@ -323,14 +336,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
     if (hadc == &hadc1) 
     {
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
-
-        float Ia, Ib, Ic, Ibus;
-        float Udc;
-        float elec_angle_rad;    
-        float speed_act_rpm;     
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);    
         
-        // 🚨 修复点 1：将独立的 a,b,c 合并为一个数组
+        // 将独立的 a,b,c 合并为一个数组
         uint16_t pwm_out[3] = {0, 0, 0}; 
         
         Vector_3Phase_t I_abc;
@@ -374,11 +382,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
             final_angle = Angle_Est;        
             actual_speed_rpm = Speed_Est_RPM;
           #endif
+            float ramp_speed_rpm = Calc_Ramp(&Speed_Ramp, target_speed_rpm);
+            float Is_target = PI_Calc(&PI_Speed, ramp_speed_rpm, actual_speed_rpm);
 
-            float Is_target = PI_Calc(&PI_Speed, target_speed_rpm, actual_speed_rpm);
-
-            float target_Id = 0.0f;
-            float target_Iq = 0.0f;
             Strategy_Get_Id_Iq_Ref(Is_target, &target_Id, &target_Iq);
             
             FOC_Current_Loop(&I_abc, final_angle, target_Iq, target_Id, Udc, pwm_out);
@@ -396,6 +402,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
             }
             Motor_Set_PWM_Duty(0, 0, 0); 
             FOC_PI_Clear();
+            Strategy_Clear();
         }
 
         uint16_t dac_ch1 = (uint16_t)((Ia * 10.0f) + 2048.0f); 

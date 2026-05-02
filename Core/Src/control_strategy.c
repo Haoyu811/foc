@@ -11,6 +11,52 @@ static float vf_angle = 0.0f;
 
 extern uint16_t Acount;
 
+// 实例化一个针对 V/F 的静态斜坡发生器
+// Step = 变化率(RPM/s) * 离散周期 TS(s) 
+static Ramp_Generator_t vf_ramp = {
+    .Target = 0.0f, 
+    .Current = 0.0f, 
+    .Step = ACCEL_RATE * TS, 
+    .Enable = 1
+};
+
+/* =======================================================
+ * 通用斜坡发生器计算函数
+ * ======================================================= */
+float Calc_Ramp(Ramp_Generator_t *ramp, float target_val) 
+{
+    ramp->Target = target_val;
+    
+    // 如果斜坡功能开启
+    if (ramp->Enable == 1) 
+    {
+        if (ramp->Current < ramp->Target) {
+            ramp->Current += ramp->Step;
+            // 防止超调
+            if (ramp->Current > ramp->Target) ramp->Current = ramp->Target; 
+        } 
+        else if (ramp->Current > ramp->Target) {
+            ramp->Current -= ramp->Step;
+            if (ramp->Current < ramp->Target) ramp->Current = ramp->Target;
+        }
+    } 
+    // 如果斜坡功能关闭 (阶跃直通)
+    else 
+    {
+        ramp->Current = ramp->Target; 
+    }
+    
+    return ramp->Current;
+}
+
+void Strategy_Clear(void) 
+{
+    // 电机停机时必须调用此函数，将速度斜坡“踩死”归零
+    vf_ramp.Target = 0.0f;
+    vf_ramp.Current = 0.0f;
+    vf_angle = 0.0f; // 角度也归零，保证下次启动从 A 相平滑起步
+}
+
 void Strategy_Get_Id_Iq_Ref(float Is_target, float *Id_Ref, float *Iq_Ref) 
 {
 #if (CURRENT_CTRL_STRATEGY == CTRL_STRATEGY_FOC_ID0)
@@ -63,8 +109,21 @@ void Strategy_Get_Id_Iq_Ref(float Is_target, float *Id_Ref, float *Iq_Ref)
 void Strategy_VF_Process(float target_rpm, float Udc, uint16_t *pwm_out) 
 {
 #if (CURRENT_CTRL_STRATEGY == CTRL_STRATEGY_VF)
+    vf_ramp.Target = target_rpm;
+    
+    if (vf_ramp.Current < vf_ramp.Target) {
+        vf_ramp.Current += vf_ramp.Step_Up;
+        if (vf_ramp.Current > vf_ramp.Target) vf_ramp.Current = vf_ramp.Target; // 防止超调
+    } 
+    else if (vf_ramp.Current > vf_ramp.Target) {
+        vf_ramp.Current -= vf_ramp.Step_Down;
+        if (vf_ramp.Current < vf_ramp.Target) vf_ramp.Current = vf_ramp.Target;
+    }
+
+    // 取出经过斜坡平滑处理后的安全转速！
+    float ramped_rpm = vf_ramp.Current;
     // 1. 速度转电频率 (Hz)
-    float target_freq_hz = (target_rpm * POLE_PAIRS) / 60.0f; 
+    float target_freq_hz = (ramped_rpm * POLE_PAIRS) / 60.0f; 
     
     // 2. 积分生成开环电角度
     vf_angle += MATH_2PI * target_freq_hz * TS;
@@ -74,7 +133,7 @@ void Strategy_VF_Process(float target_rpm, float Udc, uint16_t *pwm_out)
     // 3. 压频比计算 (V/F)
     // 注意：0.00165f 是个经验系数，你可能需要根据实际电机修改
     float v_f_ratio = 0.00165f; 
-    float v_mag = fabsf(target_rpm) * v_f_ratio + 5.0f; // +5V 为低速电压提升，克服静摩擦
+    float v_mag = fabsf(ramped_rpm) * v_f_ratio + 5.0f; // +5V 为低速电压提升，克服静摩擦
     
     // 安全限幅：不超过母线电压允许的最大不失真正弦波幅值
     float v_limit = Udc * VALUE_1_SQRT3;
