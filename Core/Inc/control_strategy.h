@@ -2,6 +2,7 @@
 #define __CONTROL_STRATEGY_H
 
 #include "motor_config.h"
+#include "foc_math.h"
 #include <stdint.h>
 
 // 斜波输入
@@ -25,7 +26,7 @@ void Strategy_Get_Id_Iq_Ref(float Is_target, float *Id_Ref, float *Iq_Ref);
  * @param  pwm_out      输出的占空比计数值指针
  */
 // 
-void Strategy_VF_Process(float target_rpm, float Udc, uint16_t *pwm_out);
+void Strategy_VF_Process(const Vector_3Phase_t *I_abc, float Angle, float target_rpm, float Udc, uint16_t *pwm_out);
 
 /**
  * @brief  转子多段式强拖预定位算法 (须在固定频率的中断中调用)

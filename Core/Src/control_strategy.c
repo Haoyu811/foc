@@ -102,21 +102,21 @@ void Strategy_Get_Id_Iq_Ref(float Is_target, float *Id_Ref, float *Iq_Ref)
 
 #else
     *Id_Ref = 0.0f;
-    *Iq_Ref = 0.0f;
+    *Iq_Ref = Is_target;
 #endif
 }
 
-void Strategy_VF_Process(float target_rpm, float Udc, uint16_t *pwm_out) 
+void Strategy_VF_Process(const Vector_3Phase_t *I_abc, float Angle, float target_rpm, float Udc, uint16_t *pwm_out) 
 {
 #if (CURRENT_CTRL_STRATEGY == CTRL_STRATEGY_VF)
     vf_ramp.Target = target_rpm;
     
     if (vf_ramp.Current < vf_ramp.Target) {
-        vf_ramp.Current += vf_ramp.Step_Up;
+        vf_ramp.Current += vf_ramp.Step;
         if (vf_ramp.Current > vf_ramp.Target) vf_ramp.Current = vf_ramp.Target; // 防止超调
     } 
     else if (vf_ramp.Current > vf_ramp.Target) {
-        vf_ramp.Current -= vf_ramp.Step_Down;
+        vf_ramp.Current -= vf_ramp.Step;
         if (vf_ramp.Current < vf_ramp.Target) vf_ramp.Current = vf_ramp.Target;
     }
 
@@ -130,7 +130,9 @@ void Strategy_VF_Process(float target_rpm, float Udc, uint16_t *pwm_out)
     if (vf_angle >= MATH_2PI) vf_angle -= MATH_2PI;
     else if (vf_angle < 0.0f) vf_angle += MATH_2PI;
 
-    // 3. 压频比计算 (V/F)
+    FOC_Current_Loop(I_abc, vf_angle, 0.5, 0, Udc, ramped_rpm, pwm_out);
+
+    /*// 3. 压频比计算 (V/F)
     // 注意：0.00165f 是个经验系数，你可能需要根据实际电机修改
     float v_f_ratio = 0.00165f; 
     float v_mag = fabsf(ramped_rpm) * v_f_ratio + 5.0f; // +5V 为低速电压提升，克服静摩擦
@@ -144,7 +146,7 @@ void Strategy_VF_Process(float target_rpm, float Udc, uint16_t *pwm_out)
     float Ubeta  = v_mag * arm_sin_f32(vf_angle);
     
     // 5. 开环发波
-    SVPWM_Calc(Ualpha, Ubeta, Udc, &pwm_out[0], &pwm_out[1], &pwm_out[2]);
+    SVPWM_Calc(Ualpha, Ubeta, Udc, &pwm_out[0], &pwm_out[1], &pwm_out[2]);*/
 #endif
 }
 

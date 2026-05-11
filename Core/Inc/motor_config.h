@@ -36,7 +36,7 @@
 
 #define ADC_VOLTAGE_COEFF   (441.3f / 4096.0f * 1.212f) // 母线电压换算系数 (V/LSB)
 #define ADC_CURRENT_COEFF   (50.0f / 4096.0f)           // 相电流换算系数 (A/LSB)
-#define UDC_NOMINAL         310.0f                      // 系统额定母线电压 (V)
+#define UDC_NOMINAL         80.0f                      // 系统额定母线电压 (V)
 #define CURRENT_LIMIT       7.0f                        // 系统额定电流 （A)
 
 /* ============================================================================ */
@@ -44,9 +44,10 @@
 /* ============================================================================ */
 
 #define POLE_PAIRS          3               // 电机极对数
+#define MOTOR_RS            0.43f           // 电阻 (Ohms)
 #define MOTOR_LD            0.00178f        // 直轴电感 (H)
 #define MOTOR_LQ            0.00249f        // 交轴电感 (H)
-#define MOTOR_FLUX          0.0288f          // 永磁体磁链 (Wb)
+#define MOTOR_FLUX          0.030323f          // 永磁体磁链 (Wb)
 #define ENCODER_LINES       4096            // 增量式编码器单圈线数/分辨率
 
 
@@ -57,16 +58,16 @@
 #define USE_ANTI_WINDUP  0  // 1:使用抗饱和PI, 0:使用普通积分PI
 
 /* D轴电流环 (控制励磁/弱磁) */
-#define KP_ID               (25.2f/7.0f)             // D轴电流环比例增益
-#define KI_ID               (0.22f/7.0f)             // D轴电流环积分增益
+#define KP_ID               10.81f            // D轴电流环比例增益
+#define KI_ID               (2610.7f*TS)       // D轴电流环积分增益
 
 /* Q轴电流环 (控制转矩) */
-#define KP_IQ               (35.4f/7.0f)             // Q轴电流环比例增益
-#define KI_IQ               (0.22f/7.0f)             // Q轴电流环积分增益
+#define KP_IQ               10.81f             // Q轴电流环比例增益
+#define KI_IQ               (1866.3f*TS)       // Q轴电流环积分增益
 
 /* 速度外环 */
-#define KP_SPD              0.0003f              // 速度环比例增益
-#define KI_SPD              0.00000002f          // 速度环积分增益
+#define KP_SPD              0.02521f              // 速度环比例增益
+#define KI_SPD              (3.168f*TS)          // 速度环积分增益
 
 /* 无感观测器锁相环 (PLL) */
 #define KP_PLL              444.3f            // 角度追踪比例增益
@@ -81,7 +82,7 @@
 #define CTRL_STRATEGY_FOC_ID0   1   // 闭环 FOC (Id=0 控制，表贴式SPM标配)
 #define CTRL_STRATEGY_FOC_MTPA  2   // 闭环 FOC (最大转矩电流比，内置式IPM标配)
 
-#define CURRENT_CTRL_STRATEGY   CTRL_STRATEGY_FOC_ID0 //  在此切换当前控制策略
+#define CURRENT_CTRL_STRATEGY   CTRL_STRATEGY_FOC_MTPA //  在此切换当前控制策略
 
 /* --- 无感观测器选择 --- */
 #define SENSORLESS_NONE         0   // 纯有感控制 (完全依赖编码器)
@@ -92,9 +93,21 @@
 #define CURRENT_SENSORLESS_MODE SENSORLESS_NONE        // 在此切换当前无感模式
 
 /* ============================================================================ */
-/* ======================== 6. 控制策略和无感策略参数 (Parameter) =========== */
+/* ======================== 6. 加速策略参数 (Parameter) ======================= */
 /* ============================================================================ */
 #define ACCEL_RATE       200.0f  // 斜波加速度 (RPM / 秒)
+
+/* ============================================================================ */
+/* ======================== 7. 无感策略参数 (Parameter) ======================= */
+/* ============================================================================ */
+/* --- SMO 观测器专属参数 --- */
+#define SMO_K               50.0f      // 滑模增益 (通常设为 0.5 ~ 1.5 倍的母线电压)
+#define SIGMOID_A           50.0f      // sigmoid 函数边界层宽度 (越大越斜，抖动越大)
+
+// 预先计算滑膜观测常量以减少中断中的计算量
+#define TS_OVER_LD          (TS / MOTOR_LD)
+#define ONE_MINUS_TS_R_LD   (1.0f - (TS * MOTOR_RS) / MOTOR_LD)
+#define LD_MINUS_LQ         (MOTOR_LD - MOTOR_LQ)
 
 /* ============================================================================ */
 /* ======================== 5. 高频注入法 (HFI) 参数 ========================== */
@@ -120,3 +133,4 @@
 #define IDQ_LPF_FC          500.0f            // HFI 提取基波用低通截止频率 (Hz)
 
 #endif /* __MOTOR_CONFIG_H */
+

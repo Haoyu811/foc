@@ -33,10 +33,17 @@ float PI_Calc_Standard(PI_Controller_t *pi, float target, float feedback)
 {
     pi->Error_Now = target - feedback;
     
-    pi->Error_Integral += pi->Error_Now; 
+    pi->Error_Integral += pi->Ki * pi->Error_Now; 
+
+    if(pi->Error_Integral > pi->Out_Limit) {
+        pi->Error_Integral = pi->Out_Limit;
+    } 
+    else if(pi->Error_Integral < -pi->Out_Limit) {
+        pi->Error_Integral = -pi->Out_Limit;
+    }
     
     // 比例+积分计算
-    pi->Out = (pi->Kp * pi->Error_Now) + (pi->Ki * pi->Error_Integral);
+    pi->Out = (pi->Kp * pi->Error_Now) + pi->Error_Integral;
     
     if(pi->Out > pi->Out_Limit) {
         pi->Out = pi->Out_Limit;
@@ -159,8 +166,8 @@ void FOC_Current_Loop(const Vector_3Phase_t *I_abc, float Angle, float Iq_Ref, f
     PI_Id.Out_Limit = v_limit;
     PI_Iq.Out_Limit = v_limit;
 
-    V_dq.D = PI_Calc(&PI_Id, Id_Ref, I_dq.D) - speed_act*POLE_PAIRS*MATH_2PI*MOTOR_LQ/60;
-    V_dq.Q = PI_Calc(&PI_Iq, Iq_Ref, I_dq.Q) + speed_act*POLE_PAIRS*MATH_2PI*MOTOR_FLUX/60;
+    V_dq.D = PI_Calc(&PI_Id, Id_Ref, I_dq.D) - speed_act*POLE_PAIRS*MATH_2PI*MOTOR_LQ*I_dq.Q/60;
+    V_dq.Q = PI_Calc(&PI_Iq, Iq_Ref, I_dq.Q) + (speed_act*POLE_PAIRS*MATH_2PI/60)*(MOTOR_FLUX+MOTOR_LD*I_dq.D);
 
     // 4. 逆 Park 变换 (电压输出)
     Inv_Park_Transform(&V_dq, &trig, &V_albe);

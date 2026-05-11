@@ -22,6 +22,7 @@ uint16_t aADCxConvertedData_Voltage[BUFFER_SIZE_VOLTAGE];
 static uint16_t PhaseAOffset = 0, PhaseBOffset = 0, PhaseCOffset = 0, IBusOffset = 0;
 
 uint16_t Acount = 0; // 确保声明了定位函数里求出的零偏
+uint16_t angle_m_count, encoder_new_count;
 
 
 /* ================== 私有函数声明 ================== */
@@ -100,10 +101,10 @@ void Motor_Get_Phase_Currents(float *pIu, float *pIv, float *pIw, float *pIbus)
     int16_t count_w = aADCxConvertedData[2] - PhaseCOffset;
     int16_t count_bus = aADCxConvertedData[3] - IBusOffset;
 
-    *pIu   = (float)count_u * ADC_CURRENT_COEFF / 7.0f;
-    *pIv   = (float)count_v * ADC_CURRENT_COEFF / 7.0f;
-    *pIw   = (float)count_w * ADC_CURRENT_COEFF / 7.0f;
-    *pIbus = (float)count_bus * ADC_CURRENT_COEFF / 7.0f;
+    *pIu   = (float)count_u * ADC_CURRENT_COEFF;
+    *pIv   = (float)count_v * ADC_CURRENT_COEFF;
+    *pIw   = (float)count_w * ADC_CURRENT_COEFF;
+    *pIbus = (float)count_bus * ADC_CURRENT_COEFF;
 }
 
 void Motor_Get_Bus_Voltage(float *pUdc)
@@ -122,8 +123,7 @@ uint16_t Motor_Get_Encoder_Count(void)
 
 void Motor_Update_Encoder_Data(float *pElec_Angle_Rad, float *pSpeed_RPM)
 {
-    uint16_t encoder_new_count = __HAL_TIM_GET_COUNTER(&htim3);
-    uint16_t angle_m_count;
+    encoder_new_count = __HAL_TIM_GET_COUNTER(&htim3);
 
     /* =======================================================
      * 1. 你的原始逻辑：反向补偿与 Acount 零偏对齐 

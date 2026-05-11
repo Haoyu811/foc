@@ -75,6 +75,6 @@ void SVPWM_Calc(float Ualpha, float Ubeta, float Udc, uint16_t *pwm_a, uint16_t 
  * @param  Udc      输入: 当前母线电压
  * @param  pwm_out  输出: 计算得到的三个定时器 CCR 值数组 [pwm_a, pwm_b, pwm_c]
  */
-void FOC_Current_Loop(const Vector_3Phase_t *I_abc, float Angle, float Iq_Ref, float Id_Ref, float Udc, uint16_t *pwm_out);
+void FOC_Current_Loop(const Vector_3Phase_t *I_abc, float Angle, float Iq_Ref, float Id_Ref, float Udc, float speed_act, uint16_t *pwm_out);
 
 #endif /* __FOC_H */

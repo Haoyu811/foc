@@ -60,7 +60,7 @@ float elec_angle_rad;
 float speed_act_rpm; 
 float target_Id = 0.0f;
 float target_Iq = 0.0f;
-float target_speed_rpm=500.0f;
+float target_speed_rpm=1000.0f;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -370,7 +370,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
             
           #if (CURRENT_CTRL_STRATEGY == CTRL_STRATEGY_VF)
 
-            Strategy_VF_Process(200.0f, Udc, pwm_out); 
+            Strategy_VF_Process(&I_abc, elec_angle_rad, 200.0f, Udc, pwm_out); 
           #else
             float final_angle;
             float actual_speed_rpm;
@@ -383,11 +383,11 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
             actual_speed_rpm = Speed_Est_RPM;
           #endif
             float ramp_speed_rpm = Calc_Ramp(&Speed_Ramp, target_speed_rpm);
-            float Is_target = PI_Calc(&PI_Speed, ramp_speed_rpm, actual_speed_rpm);
+            float Is_target = PI_Calc(&PI_Speed, target_speed_rpm, actual_speed_rpm);
 
             Strategy_Get_Id_Iq_Ref(Is_target, &target_Id, &target_Iq);
             
-            FOC_Current_Loop(&I_abc, final_angle, target_Iq, target_Id, Udc, pwm_out);
+            FOC_Current_Loop(&I_abc, final_angle, target_Iq, target_Id, Udc, actual_speed_rpm, pwm_out);
           #endif
             
             Motor_Set_PWM_Duty(pwm_out[0], pwm_out[1], pwm_out[2]);
@@ -405,7 +405,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
             Strategy_Clear();
         }
 
-        uint16_t dac_ch1 = (uint16_t)((Ia * 10.0f) + 2048.0f); 
+        uint16_t dac_ch1 = (uint16_t)((speed_act_rpm/2000)*4095.0f); 
         uint16_t dac_ch2 = (uint16_t)((elec_angle_rad / MATH_2PI) * 4095.0f);
         Motor_Debug_DAC_Output(dac_ch1, dac_ch2);
 
